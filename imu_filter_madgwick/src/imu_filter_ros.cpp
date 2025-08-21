@@ -173,6 +173,17 @@ void ImuFilterRos::imuCallback(const ImuMsg::ConstPtr& imu_msg_raw)
 
     const geometry_msgs::Vector3& ang_vel = imu_msg_raw->angular_velocity;
     const geometry_msgs::Vector3& lin_acc = imu_msg_raw->linear_acceleration;
+    // Check all data is finite
+    if (!std::isfinite(ang_vel.x) || !std::isfinite(ang_vel.y) ||
+        !std::isfinite(ang_vel.z) || !std::isfinite(lin_acc.x) ||
+        !std::isfinite(lin_acc.y) || !std::isfinite(lin_acc.z))
+    {
+        ROS_WARN_THROTTLE(
+            5.0,
+            "Received IMU message with non-finite angular velocity or linear "
+            "acceleration values. Skipping this message.");
+        return;
+    }
 
     ros::Time time = imu_msg_raw->header.stamp;
     imu_frame_ = imu_msg_raw->header.frame_id;
@@ -236,6 +247,20 @@ void ImuFilterRos::imuMagCallback(const ImuMsg::ConstPtr& imu_msg_raw,
     const geometry_msgs::Vector3& ang_vel = imu_msg_raw->angular_velocity;
     const geometry_msgs::Vector3& lin_acc = imu_msg_raw->linear_acceleration;
     const geometry_msgs::Vector3& mag_fld = mag_msg->magnetic_field;
+
+    // Check all data is finite
+    if (!std::isfinite(ang_vel.x) || !std::isfinite(ang_vel.y) ||
+        !std::isfinite(ang_vel.z) || !std::isfinite(lin_acc.x) ||
+        !std::isfinite(lin_acc.y) || !std::isfinite(lin_acc.z) ||
+        !std::isfinite(mag_fld.x) || !std::isfinite(mag_fld.y) ||
+        !std::isfinite(mag_fld.z))
+    {
+        ROS_WARN_THROTTLE(
+            5.0,
+            "Received IMU or magnetometer message with non-finite values. "
+            "Skipping this message.");
+        return;
+    }
 
     ros::Time time = imu_msg_raw->header.stamp;
     imu_frame_ = imu_msg_raw->header.frame_id;

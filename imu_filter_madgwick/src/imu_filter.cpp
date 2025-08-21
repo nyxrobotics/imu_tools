@@ -59,6 +59,15 @@ static inline void normalizeQuaternion(T& q0, T& q1, T& q2, T& q3)
     q1 *= recipNorm;
     q2 *= recipNorm;
     q3 *= recipNorm;
+    if (!std::isfinite(q0) || !std::isfinite(q1) || !std::isfinite(q2) ||
+        !std::isfinite(q3))
+    {
+        // If the quaternion is not finite, reset it to a valid state
+        q0 = 1.0;
+        q1 = 0.0;
+        q2 = 0.0;
+        q3 = 0.0;
+    }
 }
 
 static inline void rotateAndScaleVector(float q0, float q1, float q2, float q3,
@@ -181,6 +190,12 @@ void ImuFilter::madgwickAHRSupdate(float gx, float gy, float gz, float ax,
     float qDot1, qDot2, qDot3, qDot4;
     float _2bz, _2bxy;
 
+    if (!std::isfinite(gx) || !std::isfinite(gy) || !std::isfinite(gz) ||
+        !std::isfinite(ax) || !std::isfinite(ay) || !std::isfinite(az))
+    {
+        return;
+    }
+
     // Use IMU algorithm if magnetometer measurement invalid (avoids NaN in
     // magnetometer normalisation)
     if (!std::isfinite(mx) || !std::isfinite(my) || !std::isfinite(mz))
@@ -273,6 +288,11 @@ void ImuFilter::madgwickAHRSupdateIMU(float gx, float gy, float gz, float ax,
 {
     float s0, s1, s2, s3;
     float qDot1, qDot2, qDot3, qDot4;
+    if (!std::isfinite(gx) || !std::isfinite(gy) || !std::isfinite(gz) ||
+        !std::isfinite(ax) || !std::isfinite(ay) || !std::isfinite(az))
+    {
+        return;
+    }
 
     // Rate of change of quaternion from gyroscope
     orientationChangeFromGyro(q0, q1, q2, q3, gx, gy, gz, qDot1, qDot2, qDot3,
